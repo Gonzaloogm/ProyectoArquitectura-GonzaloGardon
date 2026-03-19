@@ -1,7 +1,8 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from .forms import ClienteForm, CocheForm, ServicioForm, CocheServicioForm, ContactoForm
 import json
 from .models import Cliente, Coche, Servicio, CocheServicio
 
@@ -13,6 +14,19 @@ from .models import Cliente, Coche, Servicio, CocheServicio
 def lista_clientes(request):
     clientes = Cliente.objects.all()
     return render(request, 'app_gestion_taller/lista_clientes.html', {'clientes': clientes})
+
+def lista_coches(request):
+    coches = Coche.objects.all()
+    return render(request, 'app_gestion_taller/lista_coches.html', {'coches': coches})
+
+def lista_servicios(request):
+    servicios = Servicio.objects.all()
+    return render(request, 'app_gestion_taller/lista_servicios.html', {'servicios': servicios})
+
+def lista_coche_servicios(request, coche_id=None):
+    coche=Coche.objects.filter(id=coche_id).first() if coche_id else None
+    coche_servicios = CocheServicio.objects.select_related('coche', 'servicio').coche(coche) if coche else CocheServicio.objects.select_related('coche', 'servicio').all()
+    return render(request, 'app_gestion_taller/lista_coche_servicios.html', {'coche_servicios': coche_servicios, 'coche': coche})
 
 #def detalle_cliente(request, cliente_id):
 #    try:
@@ -156,4 +170,58 @@ def servicios_de_coche(request, coche_id):
         return render(request, 'app_gestion_taller/servicios_de_coche.html', contexto)
     except Coche.DoesNotExist:
         return JsonResponse({"error": "Coche no encontrado"}, status=404)
+
+def contacto(request):
+    if request.method == 'POST':
+        formulario = ContactoForm(request.POST)
+        if formulario.is_valid():
+            # Aquí podríamos guardar o enviar los datos
+            nombre = formulario.cleaned_data['nombre']
+            return render(request, 'gracias.html', {'nombre': nombre})
+    else:
+        formulario = ContactoForm()
+
+    return render(request, 'contacto.html', {'formulario': formulario})
+
+def nuevo_cliente(request):
+    if request.method == 'POST':
+        form = ClienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_clientes')
+    else:
+        form = ClienteForm()
+    return render(request, 'formulario.html', {'form': form, 'titulo': 'Nuevo Cliente'})
+
+def nuevo_coche(request):
+    if request.method == 'POST':
+        form = CocheForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_coches')
+    else:
+        form = CocheForm()
+    return render(request, 'formulario.html', {'form': form, 'titulo': 'Nuevo Coche'})
+
+def nuevo_servicio(request):
+    if request.method == 'POST':
+        form = ServicioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_servicios')
+    else:
+        form = ServicioForm()
+    return render(request, 'formulario.html', {'form': form, 'titulo': 'Nuevo Servicio'})
+
+
+def nuevo_coche_servicio(request):
+    if request.method == 'POST':
+        coche_id = request.POST.get('coche')
+        form = CocheServicioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_coche_servicios')
+    else:
+        form = CocheServicioForm()
+    return render(request, 'formulario.html', {'form': form, 'titulo': 'Nuevo Coche-Servicio'})
 

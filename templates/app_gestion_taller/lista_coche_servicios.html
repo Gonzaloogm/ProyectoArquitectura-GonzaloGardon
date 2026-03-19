@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Taller - Historial por Vehículo</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background-color: #f4f4f4; text-align: left; padding: 10px; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; }
+        .coche-row { background-color: #e9ecef; font-weight: bold; }
+        .servicio-header { font-size: 0.9em; color: #666; background-color: #fafafa; }
+        .no-servicios { color: #999; font-style: italic; }
+        .btn { display: inline-block; padding: 10px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Historial de Servicios por Vehículo</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Identificador / Fecha</th>
+                <th>Marca / Tarea</th>
+                <th>Modelo / Materiales y Horas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coche in coches %}
+                <tr class="coche-row">
+                    <td>ID: {{ coche.id }}</td>
+                    <td>{{ coche.marca|upper }}</td>
+                    <td>{{ coche.modelo }}</td>
+                </tr>
+                
+                <tr class="servicio-header">
+                    <th style="padding-left: 30px;">ID Servicio</th>
+                    <th>Servicio Realizado</th>
+                    <th>Descripción Detallada</th>
+                </tr>
+
+                {% for servicio in coche.servicios_set.all %}
+                    <tr>
+                        <td style="padding-left: 30px;">{{ servicio.id }}</td>
+                        <td>{{ servicio.nombre }}</td>
+                        <td>{{ servicio.descripcion }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="no-servicios" style="padding-left: 30px;">
+                            No hay servicios registrados para este vehículo.
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'nuevo_coche_servicio' %}" class="btn">Registrar Nuevo Servicio</a>
+</body>
+</html>

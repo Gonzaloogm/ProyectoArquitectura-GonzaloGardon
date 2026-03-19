@@ -27,8 +27,10 @@
                     <td>{{ cliente.email }}</td>
                 </tr>
             {% endfor %}
+            
         </tbody>
     </table>
+    <a href="{% url 'nuevo_cliente' %}">Añadir nuevo cliente</a>
 </body>
 
 </html>
